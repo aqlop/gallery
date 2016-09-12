@@ -25,11 +25,16 @@ imageDatas = (function genImageURL(imageDatasArr) {
 //获取区间内的一个随机值
 function getRangeRandom(low, higth) {
 
-    return Math.ceil(Math.random() * (hight - low) + low);
+    return Math.floor(Math.random() * (hight - low) + low);
 }
 
 class ImgFigure extends React.Component {
     render() {
+
+        var styleObj = {};
+
+        //如果poros属性中指定了这张图片的位置，则使用
+
         return (
             <figure className="img-figure">
                 <img src={this.props.data.imageURL}
@@ -70,44 +75,84 @@ class AppComponent extends React.Component {
 
         var imgsArrangeArr = this.stage.imgsArrangeArr,
             Constant = this.Constant,
-            denterPos = Constant.centerPos,
+            centerPos = Constant.centerPos,
             hPosRange = Constant.hPosRange,
             vPosRange = Constant.vPosRange,
             hPosRangeLeftSecX = hPosRange.leftSecX,
-            hPosRangerightSecX = hPosRange.rightSecX,
+            hPosRangeRightSecX = hPosRange.rightSecX,
             hPosRangeY = hPosRange.y,
             vPosRangeTopY = vPosRange.topY,
             vPosRangeX = vPosRange.x,
 
             imgsArrangeTopArr = [],
-            topImgNum = Math.ceil(Math.random() * 2),//取一个或者不取
+            topImgNum = Math.floor(Math.random() * 2),//???取一个或者不取
             topImgSpliceIndex = 0,
             imgsArrangeCenterArr = imgsArrangeArr.splice(centerIndex, 1);
+
             //首先居中 centerIndex 的图片
             imgsArrangeCenterArr[0].pos = centerPos;
+
             //取出要布局上侧的图片的状态信息
-            topImgSpliceIndex = Math.ceil(Math.random() * (imgsArrangeArr.length - topImgNum));
+            topImgSpliceIndex = Math.floor(Math.random() * (imgsArrangeArr.length - topImgNum));
             imgsArrangeTopArr = imgsArrangeArr.splice(topImgSpliceIndex, topImgNum);
 
             //布局位于上侧的图片
+            imgsArrangeTopArr.forEach(function (value, index) {
 
+                imgsArrangeToparr[index].pos = {
+                    top: getRangeRandom(vPosRangeTopY[0], vPosRangeTopY[1]),
+                    // left:
+                }
+            });
 
+            //布局左右两侧的图片
+            for (var i = 0, j = imgsArrangeArr.length, k = j / 2; i < j; i++) {
+
+                var hPosRangeLORX = null;
+
+                //前半部分布局左边，右半部分布局右边
+                if (i < k) {
+
+                    hPosRangeLORX = hPosRangeLeftSecX;
+                }
+                else{
+
+                    hPosRangeLORX = hPosRangeRightSecX;
+                }
+
+                imgsArrangeArr[i].pos = {
+                    top: getRangeRandom(hPosRangeY[0], hPosRangeY[1]),
+                    left: getRangeRandom(hPosRangeLORX[0], hPosRangeLORX[1])
+                }
+            }
+
+            if(imgsArrangeTopArr && imgsArrangeTopArr[0]){
+                imgsArrangeArr.splice(topImgSpliceIndex, 0, imgsArrangeToparr[0]);
+            }
+
+            imgsArrangeArr.splice(centerIndex, 0, imgsArrangeCenterArr[0]);
+
+            this.setState({
+                imgsArrangeArr: imgsArrangeArr
+            });
     }
 
     getInitialStage() {
 
         return {
             imgsArrangeArr: [
-                {
+               /* {
                     pos: {
                         left: '0',
                         top: '0'
                     }
-                }
+                }*/
             ]
         }
     }
-
+    // componentWillMount() {
+    //     alert('msg');
+    // }
 
     //组件加载以后，为每张图片计算其位置的范围
     componentDidMount() {
@@ -118,6 +163,7 @@ class AppComponent extends React.Component {
             stageH = stageDOM.scrollHeight,
             halfStageW = Math.ceil(stageW / 2),
             halfStageH = Math.ceil(stageH / 2);
+        console.log(stageDOM);
 
         //拿到一个 imageFigure 的大小
         var imgFigureDOM = ReactDOM.findDOMNode(this.refs.imgFigure0),
@@ -167,7 +213,7 @@ class AppComponent extends React.Component {
                 }
             }
 
-            imgFigures.push(<ImgFigure data={value} ref={'imgFigure' + index}/>);
+            imgFigures.push(<ImgFigure data={value} ref={'imgFigure' + index} arrange={this.state.imgsArrangeArr[index]}/>);
         }.bind(this));
 
         return (
